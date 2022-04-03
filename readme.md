@@ -4,6 +4,11 @@
 ##豆瓣源下载
 pip install xxx -i https://pypi.douban.com/simple/
 
+## 框架说明
+    后端 fastapi
+    前端 vue3 + Ant Design of Vue(框架)
+    Ant Design of Vue 地址 https://next.antdv.com/docs/vue/introduce-cn/
+
 ## 启动命令
 后端启动命令(热更新命令)
 
