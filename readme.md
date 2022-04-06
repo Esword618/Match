@@ -2,7 +2,7 @@
 ## 注释仅仅些部分，后面再加。
 
 ##豆瓣源下载
-pip install xxx -i https://pypi.douban.com/simple/
+pip install mne -i https://pypi.douban.com/simple/
 
 ## 框架说明
     后端 fastapi

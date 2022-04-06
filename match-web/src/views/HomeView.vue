@@ -43,6 +43,7 @@ export default {
       checked1: false,
     });
 
+    // 请求测试
     const Test = () => {
       http
         .Test()
@@ -54,13 +55,50 @@ export default {
         });
     };
 
-    
+    // 开始
+    const Start = () => {
+      http
+        .Start()
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+
+    // 结束
+    const Stop = () => {
+      http
+        .Stop()
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+
+    // 请求图片
+    const ShowImg = (imgType) => {
+      http
+        .ShowImg(imgType)
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
 
     return {
       ...toRefs(state),
       closeBool,
       contentHeight,
       Test,
+      Start,
+      Stop,
+      ShowImg,
     };
   },
 };

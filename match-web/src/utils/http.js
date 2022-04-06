@@ -2,21 +2,30 @@ import request from "./httpConfig";
 // 如果是post请求需要qs进行一个处理
 // import qs from "qs";
 
-// 获取图片
+// 开始
 const Start = () => {
   return request.get("/api/start");
 };
 
+// 结束
 const Stop = () => {
   return request.get("/api/stop");
 };
 
+// 测试
 const Test = () => {
   return request.get("/api/test");
 };
+
+// 请求图片
+const ShowImg = (imgType) => {
+  return request.get("/api/showImg",{params:{imgType}})
+}
+
 
 export default {
   Start,
   Stop,
   Test,
+  ShowImg,
 };
