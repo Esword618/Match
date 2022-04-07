@@ -19,13 +19,18 @@ const Test = () => {
 
 // 请求图片
 const ShowImg = (imgType) => {
-  return request.get("/api/showImg",{params:{imgType}})
-}
+  return request.get("/api/showImg", { params: { imgType } });
+};
 
+// 获取数据
+const GetData = () => {
+  return request.get("/api/data");
+};
 
 export default {
   Start,
   Stop,
   Test,
   ShowImg,
+  GetData,
 };

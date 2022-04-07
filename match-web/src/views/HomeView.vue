@@ -6,11 +6,11 @@
     </a-layout-header>
     <!-- 主体 -->
     <a-layout-content class="layout-content" :style="{ height: contentHeight }">
-      <img
+      <!-- <img
         class="eeg"
         src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-      />
-      <div class="data">后端数据实时展示</div>
+      />-->
+      <!-- <div class="data">后端数据实时展示</div> -->
       <!-- 这里是开关 -->
       <a-switch
         class="switch"
@@ -19,18 +19,31 @@
         checked-children="开"
         un-checked-children="关"
       />
+      <!-- RawData展示 -->
+      <!-- <ConTest></ConTest> -->
+      <RawDtaChart></RawDtaChart>
     </a-layout-content>
     <!-- 脚部 -->
-    <a-layout-footer class="layout-footer">XXX by XXX</a-layout-footer>
+    <a-layout-footer class="layout-footer">designde by esword</a-layout-footer>
   </a-layout>
 </template>
 
 <script>
 import http from "@/utils/http";
 import { ref, computed, toRefs, reactive } from "vue";
+// import MyEchart from "@/components/MyEchart.vue";
+// import ConTest from "@/components/Test.vue";
+import RawDtaChart from "@/components/RawData.vue";
+import { notification } from "ant-design-vue";
 // import { message } from 'ant-design-vue';
+
 export default {
   name: "HomeView",
+  components: {
+    RawDtaChart,
+    // MyEchart,
+    // ConTest,
+  },
   setup() {
     let closeBool = ref(false);
     // 计算主体高度
@@ -43,20 +56,46 @@ export default {
       checked1: false,
     });
 
+    const openNotificationWithIcon = (type, msg, desc) => {
+      notification[type]({
+        message: msg,
+        description: desc,
+      });
+    };
+
     // 请求测试
     const Test = () => {
-      http
-        .Test()
-        .then((response) => {
-          console.log(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      if (!closeBool.value) {
+        http
+          .Test()
+          .then((response) => {
+            const msg = response.data.msg;
+            console.log(msg);
+            if (!msg) {
+              openNotificationWithIcon("error", "错误", "请检查端口");
+              state.checked1 = false;
+              return false;
+            }
+            closeBool.value = true;
+            Start();
+            return true;
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      } else {
+        Stop();
+        state.checked1 = false;
+      }
     };
 
     // 开始
     const Start = () => {
+      // let testB = Test();
+      // if (!testB) {
+      //   return;
+      // }
+      openNotificationWithIcon("success", "成功", "连接成功！");
       http
         .Start()
         .then((response) => {
@@ -69,6 +108,7 @@ export default {
 
     // 结束
     const Stop = () => {
+      openNotificationWithIcon("success", "成功", "连接已关闭！");
       http
         .Stop()
         .then((response) => {
@@ -90,7 +130,6 @@ export default {
           console.log(error);
         });
     };
-
     return {
       ...toRefs(state),
       closeBool,
@@ -99,6 +138,7 @@ export default {
       Start,
       Stop,
       ShowImg,
+      openNotificationWithIcon,
     };
   },
 };
@@ -111,6 +151,7 @@ export default {
     position: fixed;
     z-index: 1;
     width: 100%;
+
     .title {
       font-weight: bold;
       color: #10aabe;
@@ -119,6 +160,7 @@ export default {
       float: left;
     }
   }
+
   .layout-content {
     // :style="{ padding: '0 50px', marginTop: '64px',height:'100vh',overflow: 'auto' }"
     padding: 0 50px;
@@ -131,6 +173,7 @@ export default {
       width: 450px;
       height: 450px;
     }
+
     .data {
       margin-top: 20px;
       float: auto;
@@ -139,11 +182,13 @@ export default {
       // background: #10aabe;
       font-size: 40px;
     }
+
     .switch {
       margin-top: 20px;
       float: right;
     }
   }
+
   .layout-footer {
     text-align: center;
   }
