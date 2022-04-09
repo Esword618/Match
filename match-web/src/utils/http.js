@@ -18,8 +18,13 @@ const Test = () => {
 };
 
 // 请求图片
-const ShowImg = (imgType) => {
-  return request.get("/api/showImg", { params: { imgType } });
+const ShowImg = (filename) => {
+  return request.get("/api/showImg", { params: { filename } });
+};
+
+// 获取图片名字
+const GetImgName = () => {
+  return request.get("/api/getImgName");
 };
 
 // 获取数据
@@ -33,4 +38,5 @@ export default {
   Test,
   ShowImg,
   GetData,
+  GetImgName,
 };

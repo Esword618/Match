@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
+import random
+import shutil
 import time
 
 from log import logger
@@ -33,7 +35,6 @@ app.add_middleware(
 # 实例化
 myThread = MyThread()
 
-IsOk = False
 
 # 根目录
 @logger.catch
@@ -41,14 +42,27 @@ IsOk = False
 async def root():
     return {"message": "Hello World"}
 
+# 测试后端连接
+@logger.catch
+@app.get("/api/test")
+async def Test():
+    # 这里注释是为了便于调试，其实它是必须组件
+    # TestErr = myThread.Test()
+    # if TestErr:
+    #     resData = {"code": 200, "data": {"info":"请检查端口"}, "msg": False}
+    #     logger.info(resData)
+    #     return resData
+    resData = {"code":200,"data":{"info":None},"msg":True}
+    logger.info(resData)
+    return resData
+
 
 # 开始
 @logger.catch
 @app.get("/api/start")
 async def Start():
-    global IsOk
-    IsOk = True
-    myThread.Start()
+    # 这里注释是为了便于调试，其实它是必须组件
+    # myThread.Start()
     resData = {"code": 200,"data": {"info": None},"msg":True}
     return resData
 
@@ -57,11 +71,11 @@ async def Start():
 @logger.catch
 @app.get("/api/stop")
 async def Stop():
-    global IsOk
-    IsOk = False
-    myThread.Stop()
+    # 这里注释是为了便于调试，其实它是必须组件
+    # myThread.Stop()
     resData = {"code": 200,"data":{"info": None},"msg":True}
     return resData
+
 
 
 # 获取图片名字
@@ -69,65 +83,50 @@ async def Stop():
 @app.get("/api/getImgName")
 async def GetImgName():
     imgList = os.listdir('./save/img')
-    print(imgList)
-    imgList = [i.replace(".jpg","") for i in imgList if ".jpg" in i]
-    filename = f"{min(imgList)}.jpg"
+    # print(imgList)
+    # imgList = [i.replace(".jpg","") for i in imgList if ".jpg" in i]
+    # filename = f"{min(imgList)}.jpg"
+    filename = random.choice(imgList)
+    logger.info(filename)
     resData = {"code":200,"data":{"info":filename},"msg":True}
     return resData
 
-# 测试后端连接
-@logger.catch
-@app.get("/api/test")
-async def Test():
-    TestErr = myThread.Test()
-    if TestErr:
-        resData = {"code": 200, "data": {"info":"请检查端口"}, "msg": False}
-        logger.info(resData)
-        return resData
-    global IsOk
-    IsOk = True
-    resData = {"code":200,"data":{"info":None},"msg":True}
-    logger.info(resData)
-    return resData
 
 # 图片展示api
 # 请求加个时间戳就可以 例如 http://127.0.0.1:8000/api/showImg?imgType=number&t=111111 这里不会对?t=timestamp进行验证
 @logger.catch
 @app.get("/api/showImg")
 async def showImg(
-        imgType: Optional[int] = Query(...,title="图片类型"),
-        t:Optional[str] = Query(...,title="时间戳",regex="\d+")
+        filename: Optional[str] = Query(...,title="图片类型"),
     ):
-    logger.info(len(t))
-    logger.info(f"t:{t},imgType:{imgType}")
-    path = './save/img'
-    imgList = os.listdir(path)
-    imgList = [i.replace(".jpg", "") for i in imgList if ".jpg" in i]
-    filename = f"{min(imgList)}.jpg"
-    pathB = os.path.exists("./save/img/1.jpg")
+    # logger.info(len(t))
+    # logger.info(f"t:{t},imgType:{filename}")
+    # path = './save/img'
+    # imgList = os.listdir(path)
+    # imgList = [i.replace(".jpg", "") for i in imgList if ".jpg" in i]
+    # filename = f"{min(imgList)}.jpg"
+    # filename = random.choice(imgList)
+    pathB = os.path.exists(f"./save/img/{filename}")
     if pathB:
         return FileResponse(path=f'./save/img/{filename}')
-    return FileResponse(path='./static/404.jpg',filename=f"{t}.jpg")
+    # return FileResponse(path='./static/404.jpg',filename=f"{t}.jpg")
+    return FileResponse(path='./static/404.jpg')
 
 # 获取画图数据
 @logger.catch
 @app.get("/api/data")
 async def Data():
-    global IsOk
-    # IsOk = True
-    if not IsOk:
-        resData = {"code": 200, "data": {"info": []}, "msg": False}
-        logger.info(resData)
-        return resData
     # csvFileLis = os.listdir(CsvPath)
     # csvFileLis = [int(i.replace(".csv", "")) for i in csvFileLis]
     # timestamp = min(csvFileLis)
     # path = f"{CsvPath}\\{timestamp}.csv"
     # df = pd.read_csv(path)
     # data = df._get_column_array(0).tolist()
-    data2 = np.random.normal(0, 1, size=(1, 512))
-    data = data2.tolist()[0]
-    resData = {"code":200,"data":{"info":data},"msg":True}
-    logger.info(resData)
+    data2 = np.random.normal(0, 1, size=(1, 1024))
+    rawdata = data2.tolist()[0]
+    Concentration = random.randint(1,100)
+    Concentrationdata = [Concentration,100-Concentration]
     print(time.time())
+    resData = {"code":200,"data":{"rawdata":rawdata,"concentrationdata":Concentrationdata},"msg":True}
+    # logger.info(resData)
     return resData
