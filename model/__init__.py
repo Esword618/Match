@@ -2,12 +2,15 @@
 # Time : 2022/4/3 11:15
 # File : __init__.py.py
 # Author : Esword
-
+import os
 import threading
 import time
 from time import sleep
 import re
-from config import NSeconds,CsvPath
+
+import matplotlib
+
+from config import NSeconds,CsvPath,ImgPath,BackupCsvPath,BackupImgPath,AttentionPath
 import serial
 import numpy as np
 import pandas as pd
@@ -30,33 +33,38 @@ class MyThread():
             logger.warning("This is Eeg")
             if self.stop_threads:
                 break
-
-            data_path = CsvPath
-
+            CsvPathList = os.listdir(CsvPath)
+            CsvPathList = [int(i.replace(".csv", "")) for i in CsvPathList]
+            timestamp = min(CsvPathList)
+            data_path = f"save/csv/{timestamp}.csv"
             data1 = []
-            for j in range(1, 23):
+            matplotlib.use('Agg')
+            for j in range(0, 22):
                 data = pd.read_csv(data_path, usecols=[str(j)])
                 list1 = data.values.tolist()
                 final_list = list(chain.from_iterable(list1))
                 data1.append(final_list)
 
-            ch_names = ['Fz', 'FC3', 'FC1', 'FCz', 'FC2', 'FC4', 'C5', 'C3', 'C1', 'Cz', 'C2', 'C4', 'C6', 'CP3', 'CP1',
-                        'CPz',
+            ch_names = ['Fz', 'FC3', 'FC1', 'FCz', 'FC2', 'FC4', 'C5', 'C3', 'C1', 'Cz', 'C2', 'C4', 'C6',
+                        'CP3', 'CP1', 'CPz',
                         'CP2', 'CP4', 'P1', 'Pz', 'P2', 'POz']
-            ch_types = ['eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg',
-                        'eeg', 'eeg',
+            ch_types = ['eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg',
+                        'eeg', 'eeg', 'eeg',
                         'eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg', 'eeg']
-            sfreq = 100  # Hz
+            sfreq = 512  # Hz
             info = mne.create_info(ch_names, sfreq, ch_types)
+            raw = mne.io.RawArray(data1, info)
             montage = mne.channels.make_standard_montage("standard_1020")
+            raw.set_montage(montage)
 
-            # 事件 根据事件生成
-            evoked = mne.EvokedArray(data1, info)
-            evoked.set_montage(montage)
-            evoked_csd = mne.preprocessing.compute_current_source_density(evoked)
-            evoked.plot_joint(title='Average Reference', show=False)
-            evoked_csd.plot_joint(title='Current Source Density')
-            plt.show()
+            # 需要滤波
+            raw = raw.filter(l_freq=0.1, h_freq=30)
+            # components太高runtime_error
+            ica = mne.preprocessing.ICA(n_components=8, random_state=97, max_iter=800)
+            ica.fit(raw)
+            for k, figure in enumerate(ica.plot_components()):
+                figure.savefig(f'{ImgPath}/{timestamp}.png')
+                figure.savefig(f'{BackupImgPath}/{timestamp}.png')
 
     # 接收数据
     def Sensor(self):
@@ -161,8 +169,11 @@ class MyThread():
                             "Attention": Attention,
                             "Meditation": Meditation
                         }
+                        #
                         if NSeconds == IsNSeconds:
                             IsNSeconds = 0
+                            # 数据情况
+                            info=''
                             df = pd.DataFrame({
                                 '0': np.array(rawdataList),
                                 '1': 0,
@@ -189,7 +200,11 @@ class MyThread():
                             })
                             # 清空 rawdataList
                             rawdataList.clear()
-                            df.to_csv(f"{CsvPath}/{int(time.time() * 10)}.csv", index=False)
+                            timestamp = int(time.time() * 10)
+                            with open(AttentionPath,"w") as f:
+                                f.write(f"{Attention}")
+                            df.to_csv(f"{CsvPath}/{timestamp}.csv", index=False)
+                            df.to_csv(f"{BackupCsvPath}/{timestamp}.csv", index=False)
                             # with open(f"data_file/{int(time.time()*10)}.txt","w") as f:
                             #     f.write(json.dumps(Info))
 

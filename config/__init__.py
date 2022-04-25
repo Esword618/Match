@@ -12,24 +12,28 @@ portName = "COM4"
 BaudRate = 57600
 # N 秒写一次csv
 NSeconds = 4
+# 默认路径
+BasePath = "./save"
+# 专注度路径
+AttentionPath = f'{BasePath}/attention.txt'
 # csv保存路径
-CsvPath = "./save/csv"
+CsvPath = f"{BasePath}/csv"
 # 生成图片保存路径
-ImgPath = "./save/img"
+ImgPath = f"{BasePath}/img"
+# backpath
+BaseBackPath = f"{BasePath}/backup"
+# 备份csv数据
+BackupCsvPath = f"{BaseBackPath}/csv"
+# 备份图片路径
+BackupImgPath = f"{BaseBackPath}/img"
 # 日志路径
-LogPath = "./save/logs"
+LogPath = f"{BasePath}/logs"
 
 
 def Init():
-    b = os.path.exists("./save")
-    if not b:
-        os.mkdir("./save")
-    b = os.path.exists(CsvPath)
-    if not b:
-        os.mkdir(CsvPath)
-    b = os.path.exists(ImgPath)
-    if not b:
-        os.mkdir(ImgPath)
-    b = os.path.exists(LogPath)
-    if not b:
-        os.mkdir(LogPath)
+    PathList = [BasePath,CsvPath,ImgPath,BaseBackPath,BackupCsvPath,BackupImgPath,LogPath]
+    for iPath in PathList:
+        b = os.path.exists(iPath)
+        if not b:
+            os.mkdir(iPath)
+

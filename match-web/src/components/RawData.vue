@@ -67,7 +67,7 @@ export default {
       //配置项，可以去查一下官方文档
       let ConcentrationDataoptions = {
         title: {
-          text: "我是嫩爹",
+          text: "专注度",
           x: "center",
         },
         series: [
