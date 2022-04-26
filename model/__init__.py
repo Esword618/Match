@@ -26,6 +26,7 @@ class MyThread():
         self.threadEeg = None
         self.threadSensor = None
         self.SensorErr = False
+        self.IsNSeconds = 0
 
     # 生成图片位置
     def Eeg(self):
@@ -68,7 +69,7 @@ class MyThread():
 
     # 接收数据
     def Sensor(self):
-        portName = "COM7"
+        portName = "COM3"
         BaudRate = 57600
         port = serial.Serial(port=portName, baudrate=BaudRate)
         if port.isOpen():
@@ -78,11 +79,10 @@ class MyThread():
             print(50 * '-')
             info = ''
             # 判断是否是第一包，一开始为真，判断是第一个就设为False
-            IsNSeconds = 0
             while True:
                 if self.stop_threads:
                     return
-                logger.warning("Sensor")
+                # logger.warning("Sensor")
                 info += port.read(size=72).hex().upper()
                 S = re.findall('AAAA2002[A-Za-z0-9]{64}(.*?)(AAAA2002[A-Za-z0-9]{64})', info)
                 if S:
@@ -105,7 +105,7 @@ class MyThread():
                             rawdata = (xxHigh << 8) | xxLow
                             rawdata = (rawdata * (1.8 / 4096)) / 2000
                             rawdataList.append(rawdata)
-                            IsNSeconds += 1
+                            self.IsNSeconds += 1
                             # if len(rawdataList)==20:
                             #     # 做图片什么的操作
                             #     rawdataList.clear()
@@ -116,7 +116,7 @@ class MyThread():
                             # print("----------")
 
                         # if isNext:
-                        #     print(rawdataList)
+                            # print(rawdataList)
 
                         # 打包数据处理
                         # AA 同步
@@ -169,42 +169,44 @@ class MyThread():
                             "Attention": Attention,
                             "Meditation": Meditation
                         }
+                        # logger.info(Info)
+                        logger.warning(self.IsNSeconds)
                         #
-                        if NSeconds == IsNSeconds:
-                            IsNSeconds = 0
+                        # if NSeconds == self.IsNSeconds:
                             # 数据情况
-                            info=''
-                            df = pd.DataFrame({
-                                '0': np.array(rawdataList),
-                                '1': 0,
-                                '2': 0,
-                                '3': 0,
-                                '4': 0,
-                                '5': 0,
-                                '6': 0,
-                                '7': 0,
-                                '8': 0,
-                                '9': 0,
-                                '10': 0,
-                                '11': 0,
-                                '12': 0,
-                                '13': 0,
-                                '14': 0,
-                                '15': 0,
-                                '16': 0,
-                                '17': 0,
-                                '18': 0,
-                                '19': 0,
-                                '20': 0,
-                                '21': 0
-                            })
-                            # 清空 rawdataList
-                            rawdataList.clear()
-                            timestamp = int(time.time() * 10)
-                            with open(AttentionPath,"w") as f:
-                                f.write(f"{Attention}")
-                            df.to_csv(f"{CsvPath}/{timestamp}.csv", index=False)
-                            df.to_csv(f"{BackupCsvPath}/{timestamp}.csv", index=False)
+                        info=''
+                        df = pd.DataFrame({
+                            '0': np.array(rawdataList),
+                            '1': 0,
+                            '2': 0,
+                            '3': 0,
+                            '4': 0,
+                            '5': 0,
+                            '6': 0,
+                            '7': 0,
+                            '8': 0,
+                            '9': 0,
+                            '10': 0,
+                            '11': 0,
+                            '12': 0,
+                            '13': 0,
+                            '14': 0,
+                            '15': 0,
+                            '16': 0,
+                            '17': 0,
+                            '18': 0,
+                            '19': 0,
+                            '20': 0,
+                            '21': 0
+                        })
+                        # 清空 rawdataList
+                        rawdataList.clear()
+                        timestamp = int(time.time() * 10)
+                        with open(AttentionPath,"w") as f:
+                            f.write(f"{Attention}")
+                        df.to_csv(f"{CsvPath}/{timestamp}.csv", index=False)
+                        df.to_csv(f"{BackupCsvPath}/{timestamp}.csv", index=False)
+                        self.IsNSeconds = 0
                             # with open(f"data_file/{int(time.time()*10)}.txt","w") as f:
                             #     f.write(json.dumps(Info))
 
@@ -220,7 +222,7 @@ class MyThread():
         if self.SensorErr:
             self.Stop()
             self.threadEeg.join()
-            return True
+            return False
         self.Stop()
         return True
 

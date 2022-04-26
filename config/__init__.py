@@ -7,13 +7,13 @@
 # 串口名字
 import os.path
 
-portName = "COM4"
+portName = "COM3"
 # 波特率
 BaudRate = 57600
 # N 秒写一次csv
-NSeconds = 4
+NSeconds = 1
 # 默认路径
-BasePath = "./save"
+BasePath = "D:\pyproject\Match\save"
 # 专注度路径
 AttentionPath = f'{BasePath}/attention.txt'
 # csv保存路径

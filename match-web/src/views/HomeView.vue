@@ -111,7 +111,8 @@ export default {
             }
             closeBool.value = true;
             isok.value = true;
-            Start();
+            console.log("Start");
+            // Start();
             return true;
           })
           .catch((error) => {
