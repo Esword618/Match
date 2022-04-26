@@ -10,4 +10,4 @@ from loguru import logger
 
 Nowadays = time.strftime("%Y-%m-%d", time.localtime())
 
-logger.add(f"{os.getcwd()}/save/logs/{Nowadays}.log", rotation="5MB", encoding="utf-8", enqueue=True, compression="zip",retention="1 days")
+logger.add(f"{os.getcwd()}/save/logs/{Nowadays}.log", rotation="5MB", encoding="utf-8", enqueue=True,retention="1 days")
